@@ -67,9 +67,9 @@ priceStyle = "font-size: 3rem; font-weight: bold; margin: -1.75rem 0rem; padding
 priceStyle2 = "font-size: 2.5rem; font-weight: 600; margin: -1.75rem 0rem; padding: 0;"
 priceSubStyle = "font-size: 1rem; font-weight: normal; margin: 0; padding: 0;"
 bestPriceStyle = "color: green;"
-valueUpStyle = "color: green; margin: -1.25rem 0rem; padding: 0;"
-valueDownStyle = "color: red; margin: -1.25rem 0rem; padding: 0;"
-valueNeutralStyle = "color: grey; margin: -1.25rem 0rem; padding: 0;"
+valueUpStyle = "color: green; font-weight: bold; margin: -1.25rem 0rem; padding: 0;"
+valueDownStyle = "color: red; font-weight: bold; margin: -1.25rem 0rem; padding: 0;"
+valueNeutralStyle = "color: grey; font-weight: bold; margin: -1.25rem 0rem; padding: 0;"
 
 maincol2.markdown(f"<p style='{priceStyle}'>£{str(selectedPhone['price'][-1])} <span style='{priceSubStyle}'>Buying Price</p></p>", unsafe_allow_html=True)
 if hasHistoricalData: maincol2.markdown(f"<p style='{(valueUpStyle if priceFluctuation[0] == '▲' else valueDownStyle if priceFluctuation[0] == '▼' else valueNeutralStyle)}'>{priceFluctuation}</p>", unsafe_allow_html=True)
@@ -89,10 +89,29 @@ st.button('🔃', on_click=invalidate_cache_and_reload)
 st.caption(f'Last updated: {currentTime.floor("s")}')
 
 if hasHistoricalData:
-    price_data = selectedPhone['price']
-    time_data = pd.to_datetime(selectedPhone['time']).date
-    df_new = pd.DataFrame({'price': price_data, 'time': time_data})
     st.subheader('Price History')
-    st.line_chart(df_new, x='time', y='price')
-
-# st.line_chart(data.loc[data["phoneid"] == selectedPhone["phoneid"]], x="time", y="price")
+    chart = st.empty()
+    graphControlscol1, graphControlscol2 = st.columns(2)
+    priceType = graphControlscol1.radio('Price Type', ['Buying Price', 'Trade in for Voucher', 'Trade in for Cash'])
+    extraphones = graphControlscol2.multiselect('Compare with other phones', data['phoneid'].unique())
+    price_data = selectedPhone['price'] if priceType == 'Buying Price' else selectedPhone['trade-in_for_voucher'] if priceType == 'Trade in for Voucher' else selectedPhone['trade-in_for_cash']
+    time_data = pd.to_datetime(selectedPhone['time'], format='%Y-%m-%d-%H-%M-%S').date
+    df_new = pd.DataFrame({'Date': time_data, 
+                        f'{selectedPhone['phone_model']}, {selectedPhone['main_colour']}, {selectedPhone["capacity"]}, {selectedPhone["grade"]}, {selectedPhone["network"]}': price_data, })
+    if extraphones:
+        extraPhonesDf = pd.DataFrame()
+        for phone in extraphones:
+            phoneData = data[data['phoneid'] == phone].iloc[0]
+            phoneData['price'] = [float(x) for x in phoneData['price']]
+            phoneData['trade-in_for_voucher'] = [float(x) for x in phoneData['trade-in_for_voucher']]
+            phoneData['trade-in_for_cash'] = [float(x) for x in phoneData['trade-in_for_cash']]
+            price_data = phoneData['price'] if priceType == 'Buying Price' else phoneData['trade-in_for_voucher'] if priceType == 'Trade in for Voucher' else phoneData['trade-in_for_cash']
+            time_data = pd.to_datetime(phoneData['time'], format='%Y-%m-%d-%H-%M-%S').date
+            temp = pd.DataFrame({f'{phoneData['phone_model']}, {phoneData['main_colour']}, {phoneData["capacity"]}, {phoneData["grade"]}, {phoneData["network"]}': price_data, 
+                                    'Date': time_data})
+            df_new = df_new.merge(temp, on='Date', how='outer')
+    chart.line_chart(df_new, x='Date')
+    with st.expander('Raw Price History Data'):
+        st.write(df_new)
+    with st.expander('Debug data'):
+        st.write(selectedPhone)
