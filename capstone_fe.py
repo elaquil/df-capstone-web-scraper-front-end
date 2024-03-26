@@ -107,7 +107,7 @@ if hasHistoricalData:
             phoneData['trade-in_for_cash'] = [float(x) for x in phoneData['trade-in_for_cash']]
             price_data = phoneData['price'] if priceType == 'Buying Price' else phoneData['trade-in_for_voucher'] if priceType == 'Trade in for Voucher' else phoneData['trade-in_for_cash']
             time_data = pd.to_datetime(phoneData['time'], format='%Y-%m-%d-%H-%M-%S').date
-            temp = pd.DataFrame({f'{phoneData['phone_model']}, {phoneData['main_colour']}, {phoneData["capacity"]}, {phoneData["grade"]}, {phoneData["network"]}': price_data, 
+            temp = pd.DataFrame({f'{phoneData["phone_model"]}, {phoneData["main_colour"]}, {phoneData["capacity"]}, {phoneData["grade"]}, {phoneData["network"]}': price_data, 
                                     'Date': time_data})
             df_new = df_new.merge(temp, on='Date', how='outer')
     chart.line_chart(df_new, x='Date')
