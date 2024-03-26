@@ -5,13 +5,13 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import altair as alt
 import requests
 
 st. set_page_config(layout="wide")  
 # Load data
 @st.cache_data
 def load_data():
-    # fetch JSON from API URL
     url = "https://buw5pcb475.execute-api.us-east-1.amazonaws.com/production/phones"
     response = requests.get(url)
     data = response.json()["phones"]
@@ -110,7 +110,7 @@ if hasHistoricalData:
             temp = pd.DataFrame({f'{phoneData["phone_model"]}, {phoneData["main_colour"]}, {phoneData["capacity"]}, {phoneData["grade"]}, {phoneData["network"]}': price_data, 
                                     'Date': time_data})
             df_new = df_new.merge(temp, on='Date', how='outer')
-    chart.line_chart(df_new, x='Date')
+    chart.line_chart(df_new, x='Date',)
     with st.expander('Raw Price History Data'):
         st.write(df_new)
     with st.expander('Debug data'):
