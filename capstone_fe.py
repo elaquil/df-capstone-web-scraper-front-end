@@ -97,7 +97,7 @@ if hasHistoricalData:
     price_data = selectedPhone['price'] if priceType == 'Buying Price' else selectedPhone['trade-in_for_voucher'] if priceType == 'Trade in for Voucher' else selectedPhone['trade-in_for_cash']
     time_data = pd.to_datetime(selectedPhone['time'], format='%Y-%m-%d-%H-%M-%S').date
     df_new = pd.DataFrame({'Date': time_data, 
-                        f'{selectedPhone['phone_model']}, {selectedPhone['main_colour']}, {selectedPhone["capacity"]}, {selectedPhone["grade"]}, {selectedPhone["network"]}': price_data, })
+                        f'{selectedPhone["phone_model"]}, {selectedPhone["main_colour"]}, {selectedPhone["capacity"]}, {selectedPhone["grade"]}, {selectedPhone["network"]}': price_data, })
     if extraphones:
         extraPhonesDf = pd.DataFrame()
         for phone in extraphones:
