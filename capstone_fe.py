@@ -96,7 +96,7 @@ if hasHistoricalData:
     extraphones = graphControlscol2.multiselect('Compare with other phones', data['phoneid'].unique())
     price_data = selectedPhone['price'] if priceType == 'Buying Price' else selectedPhone['trade-in_for_voucher'] if priceType == 'Trade in for Voucher' else selectedPhone['trade-in_for_cash']
     time_data = pd.to_datetime(selectedPhone['time'], format='%Y-%m-%d-%H-%M-%S').date
-    df_new = pd.DataFrame({'Date': time_data, 
+    historical_data_df = pd.DataFrame({'Date': time_data, 
                         f'{selectedPhone["phone_model"]}, {selectedPhone["main_colour"]}, {selectedPhone["capacity"]}, {selectedPhone["grade"]}, {selectedPhone["network"]}': price_data, })
     if extraphones:
         extraPhonesDf = pd.DataFrame()
@@ -109,9 +109,9 @@ if hasHistoricalData:
             time_data = pd.to_datetime(phoneData['time'], format='%Y-%m-%d-%H-%M-%S').date
             temp = pd.DataFrame({f'{phoneData["phone_model"]}, {phoneData["main_colour"]}, {phoneData["capacity"]}, {phoneData["grade"]}, {phoneData["network"]}': price_data, 
                                     'Date': time_data})
-            df_new = df_new.merge(temp, on='Date', how='outer')
-    chart.line_chart(df_new, x='Date',)
+            historical_data_df = historical_data_df.merge(temp, on='Date', how='outer')
+    chart.line_chart(historical_data_df, x='Date',)
     with st.expander('Raw Price History Data'):
-        st.write(df_new)
+        st.write(historical_data_df)
     with st.expander('Debug data'):
         st.write(selectedPhone)
